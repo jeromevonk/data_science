@@ -1,0 +1,8 @@
+I hereby confirm that this submission is my work. 
+I have cited above the origins of any parts of the submission that were taken from Websites, books, forums, blog posts, github repositories, etc.
+
+https://en.wikipedia.org/wiki/Cross-validation_%28statistics%29
+https://en.wikipedia.org/wiki/Overfitting
+https://towardsdatascience.com/train-validation-and-test-sets-72cb40cba9e7
+https://stackoverflow.com/questions/45969390/difference-between-stratifiedkfold-and-stratifiedshufflesplit-in-sklearn
+https://en.wikipedia.org/wiki/Precision_and_recall

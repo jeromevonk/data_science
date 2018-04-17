@@ -1,0 +1,5 @@
+http://overpass-api.de/query_form.html
+
+
+query:
+(node(40.3757,-3.8284,40.4958,-3.5589);<;);out meta;
