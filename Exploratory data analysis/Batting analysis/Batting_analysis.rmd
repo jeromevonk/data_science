@@ -1,0 +1,113 @@
+---
+title: "Batting  analysis"
+author: "Jerome Vonk"
+date: "March 2nd, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(out.width='750px', dpi=200)
+
+library(Lahman)
+library(dplyr)
+library(ggplot2)
+data(Batting)
+```
+
+## The data
+Sean Lahman's Baseball Database contains pitching, hitting, and fielding statistics for Major League Baseball from 1871 through 2016. It includes data from the two current leagues (American and National), the four other "major" leagues (American Association, Union Association, Players League, and Federal League), and the National Association of 1871-1875.
+
+This database was created by Sean Lahman, who pioneered the effort to make baseball statistics freely available to the general public. What started as a one man effort in 1994 has grown tremendously, and now a team of researchers have collected their efforts to make this the largest and most accurate source for baseball statistics available anywhere.
+
+For this analysis, we're using the following libraries: _Lahman_, _dplyr_ and _ggplot2_
+
+Let's have a look at the Batting table:
+
+```{r echo=FALSE}
+
+head(Batting)
+
+```
+
+
+Now, let's group by userID:
+```{r}
+groups  <- group_by(Batting, playerID)
+grouped <- summarise(groups,
+                     games = sum(G),
+                     homeruns = sum(HR),
+                     strikeouts = sum(SO))
+           
+
+grouped <- arrange(grouped, desc(games))
+```
+
+This is what we get:
+```{r echo=FALSE}
+head(grouped)
+```
+
+
+## Plot 1: games played versus homeruns
+
+```{r}
+ggplot(aes(x = games, y = homeruns), data = grouped) +
+  geom_point(alpha = 0.1, color = 'orange')
+```
+
+and the correlation is
+
+```{r}
+with(grouped, cor.test(games, homeruns))
+```
+
+It seems very logical that the more games played, the more likely it is to have more homeruns, right? The plot and the value of the Pearson correlation indicate that.   
+
+## Plot 2 : games played versus strikeouts
+
+```{r}
+ggplot(aes(x = games, y = strikeouts), data = grouped) +
+  geom_point(alpha = 0.1, color = 'blue')
+```
+
+and the correlation is
+
+```{r}
+with(grouped, cor.test(games, strikeouts))
+```
+
+Games played and strikeouts looks even more correlated!
+
+## Plot 3 : homeruns versus strikeouts
+
+What will we find about homeruns and strikeouts? Are they correlated?
+```{r}
+ggplot(aes(x = homeruns, y = strikeouts), data = grouped) +
+  geom_point(alpha = 0.1, color = 'red')
+```
+
+and the correlation is
+
+```{r}
+with(grouped, cor.test(homeruns, strikeouts))
+```
+
+That's way more than I expected. Could it simply because more homeruns means more games played, and that would lead eventually to more strikeouts as well. So let's try something else
+
+## Plot 4 : home runs per game versus strikeouts per game
+
+
+```{r}
+ggplot(aes(x = homeruns/games, y = strikeouts/games), data = grouped) +
+  geom_point(alpha = 0.1, color = 'brown')
+```
+
+and the correlation is
+
+```{r}
+with(grouped, cor.test(homeruns/games, strikeouts/games))
+```
+
+Comment: Now it makes more sense for me. The Perason correlation value dropped a lot. Looks like the number of homeruns and strikeouts is not strongly correlated anymore.
+

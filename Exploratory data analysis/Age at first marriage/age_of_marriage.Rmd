@@ -1,0 +1,55 @@
+---
+title: "Age at First Marriage for Women"
+author: "Jerome Vonk"
+date: "25th February 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## The data
+
+This data was extracted from <https://www.gapminder.org/data/>. The continent in which each country resided was added manually by me.
+```{r echo=FALSE, include=FALSE}
+library(ggplot2)
+marriage <- read.csv('age_marriage.csv')
+```
+
+
+## Histogram of Age at First Marriage for Women in 2005
+```{r echo=FALSE}
+summary(marriage$X2005)
+qplot(x = X2005, 
+      data = subset(marriage, !is.na(marriage$X2005)),
+      binwidth = 1,
+      ylab = "Number of occurences",
+      xlab = "Age of first marriage for women (2005)",
+      color = I('black'), 
+      fill = I('#0010F1') )  +
+  scale_x_continuous(breaks = seq(16,34,1), limits=c(16,34))
+```
+
+## Faceting by continent
+
+This is what we encounter by faceting for continents:
+
+```{r, echo=FALSE, message=FALSE}
+qplot(x = X2005, 
+      data = subset(marriage, !is.na(marriage$X2005)),
+      binwidth = 1,
+      ylab = "Number of occurences",
+      xlab = "Age of first marriage for women (2005)",
+      color = I('black'), 
+      fill = I('#0010F1') )  +
+  scale_x_continuous(breaks = seq(20,30,5), limits=c(16,34)) +
+  facet_wrap(~continent, scales = "free_y")
+```
+
+The peak for Africa and Europe look quite different, right? Let's see it numerically:
+```{r}
+by(marriage$X2005, marriage$continent, summary)
+```
+
+Indeed, we find out that Europe shows the highest age at first marriage median (~27.7 years) and Africa the lowest (~21.3). 

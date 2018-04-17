@@ -1,0 +1,120 @@
+---
+title: "NY Flights"
+author: "Jerome Vonk"
+date: "March 2nd, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(out.width='750px', dpi=200)
+
+library(nycflights13)
+library(ggplot2)
+library(dplyr)
+
+data(flights)
+flights$carrier <- factor(flights$carrier)
+flights$month <- factor(flights$month)
+```
+
+## The data
+On-time data for all flights that departed NYC (i.e. JFK, LGA or EWR) in 2013.
+
+For this analysis, we're using the following libraries: _nycflights13_, _dplyr_ and _ggplot2_
+
+Let's have a look at the Flights table:
+
+```{r echo=FALSE}
+
+head(flights)
+
+```
+
+
+
+## Plot 1: Histrogram of departure delay, colored by month and faceted by carrier
+
+```{r echo=FALSE}
+flights_sub <- subset(flights, !is.na(dep_delay) & !is.na(arr_delay) )
+ggplot(aes(x = dep_delay), data = subset(flights_sub, dep_delay >= 0 & dep_delay <= quantile(dep_delay, .90) ) ) +
+  geom_histogram(aes(fill = month), binwidth = 1) + 
+  facet_wrap(~carrier)
+```
+
+
+I can't see any relationship between months and delays in this plot. Regarding carrier, it looks like some have way more delays than others. Let's investigate a bit more, because it can depend on the number of flights each carrier has.
+
+
+## Plot 2: Average departure delay per carrier
+
+```{r echo=FALSE}
+by_carrier <- flights_sub %>%
+  group_by(carrier) %>%
+  summarise(mean_dep_delay = mean(dep_delay),
+            n = n()) %>%
+  arrange(desc(n))
+  
+ggplot(aes(x = carrier, y = mean_dep_delay), data = by_carrier) +
+  geom_point(aes(color = n)) + 
+  scale_fill_brewer(palette="Greens") + 
+  xlab("Carrier") + 
+  ylab("Average departure delay")
+```
+
+
+Not that we plotted the average delay, we don't see so big of a difference. Still, we can see that some carriers have bigger average departure delays than others:
+
+```{r echo=FALSE}
+by_carrier
+```
+It is actually _EV_ that has the greatest departure delay in average. But we couldn't tell that just by looking at plot #1.
+
+## Plot 3: Departure delay vs Arrival delay
+
+```{r echo=FALSE}
+ggplot(aes(x = dep_delay, y = arr_delay), data = flights_sub ) +
+  geom_point(aes(color = carrier), alpha = 0.4) +
+  geom_abline(intercept = 0, slope = 1, color = 'brown') +
+  coord_cartesian(xlim = c(-15,500), ylim = c(-15,500)) + 
+  xlab("Departure delay") + 
+  ylab("Arrival delay")
+  
+```
+
+
+We can see that the variables are highly correlated and that the majority of points are above the diagonal line, meaning that the arrival delay is bigger than the departure delay in most cases. The correlation is:
+
+```{r echo=FALSE}
+with(flights_sub, cor.test(dep_delay, arr_delay))
+```
+Was it that obvious? I had two things in mind when I asked myself that question:
+- Is it possible to 'minimize the delay' by asking for preference when landing, or similar?
+- Are there other reasons that influence the arrival delay, other then the departure delay?
+
+It seems like the answer for both questions in YES. There are cases where the arrival delay is smaller (even zero) than the departure delay. And there are also cases when the departure delay was zero but the arrival delay was as big as 200 minutes.
+
+## Plot 4: Was there a particularly troublesome day or month?
+
+Have a look at the following table. The number of flights is similar for every month at the year (except maybe for February), but the average departure delay is considerable bigger in June and July.
+
+```{r echo=FALSE}
+by_month <- flights_sub %>%
+  group_by(month) %>%
+  summarise(mean_dep_delay = mean(dep_delay),
+            n = n()) %>%
+  arrange(desc(mean_dep_delay))
+
+by_month
+```
+
+
+Why does that happen? Let's plot the Departure delay x Day and facet by month:
+
+```{r echo=FALSE}
+ggplot(aes(x = day, y = dep_delay), data = flights_sub ) +
+  geom_point(alpha = 0.1, color = 'brown') + 
+  facet_wrap(~month)
+```
+
+There aren't that many outliers or specific troublesome days in June or July that could explain this phenomenon. Perhaps we would need to join weather data to explain this. TO BE CONTINUED!
