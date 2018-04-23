@@ -3,7 +3,7 @@
 """
 Udacity Data Science For Business Nanodegree
 Part 1: Data wrangling
-Project: Wrange OpenStreetMap Data
+Project: Wrangle OpenStreetMap Data
 Student: Jerome Vergueiro Vonk
 
 Script: 4_improve_street_types.py
@@ -31,7 +31,7 @@ expected = ["Calle", "Plaza", "Avenida", "Vía", "Alameda", "Camino", "Pasaje", 
 
 
 mapping = { "CL": "Calle", "C/": "Calle", "calle": "Calle",
-            "AUTOP.": "Autopista", "Avda.": "Avenida", "Via": "Vía",  "plaza": "Plaza", 
+            "AUTOP.": "Autopista", "Avda.": "Avenida", "Via": "Vía",  "plaza": "Plaza",
             "CR": "Carrera", "CTRA.": "Carretera", "Ctra": "Carretera"
            }
 
@@ -67,11 +67,11 @@ def update_name(name, mapping):
     """Makes an improvement in the address (name) according to the dictionary (mapping)"""
     m = street_type_re.search(name)
     not_good_type = m.group()
-    
+
     try:
         name = name.replace(not_good_type, mapping[not_good_type])
         return name
-    except: 
+    except:
         return False
 
 
@@ -79,17 +79,17 @@ def test(dataset):
     """Perform the test on the selected dataset """
     print("Running 4_improve_street_types.py")
     st_types = defaultdict(set)
-    
+
     # Run against the sample or the full data?
     if dataset == "sample":
         st_types = audit(SAMPLE_PATH)
     else:
         st_types = audit(DATA_PATH)
-    
+
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w") as fo:
         pprint.pprint(dict(st_types), fo)
-        
+
         # Modify street names
         for st_type, ways in st_types.items():
             for name in ways:
@@ -103,5 +103,5 @@ if __name__ == '__main__':
     dataset = "full"
     if len(sys.argv) > 1:
         dataset = sys.argv[1]
-        
+
     test(dataset)

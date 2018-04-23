@@ -3,7 +3,7 @@
 """
 Udacity Data Science For Business Nanodegree
 Part 1: Data wrangling
-Project: Wrange OpenStreetMap Data
+Project: Wrangle OpenStreetMap Data
 Student: Jerome Vergueiro Vonk
 
 Script: 2_tag_potential_problems.py
@@ -28,22 +28,22 @@ OUTPUT_FILE = "output\\2_tag_potential_problems.txt"
 
 def key_type(element, keys):
     """For a given tag, look for potential problems"""
-    if element.tag == "tag":        
+    if element.tag == "tag":
         if lower.search(element.attrib['v']):
             #print(element.attrib['v'], "lower")
             keys['lower'] += 1
-            
+
         elif lower_colon.search(element.attrib['v']):
             #print(element.attrib['v'], 'lower_colon')
             keys['lower_colon'] += 1
-            
+
         elif problemchars.search(element.attrib['v']):
             #print(element.attrib['v'], 'problemchars')
             keys['problemchars'] += 1
         else:
             #print(element.attrib['v'], 'other')
             keys['other'] += 1
-        
+
     return keys
 
 
@@ -63,13 +63,13 @@ def test(dataset):
     """Perform the test on the selected dataset"""
     print("Running 2_tag_potential_problems.py")
     keys = {}
-    
+
     # Run against the sample or the full data?
     if dataset == "sample":
         keys = process_map(SAMPLE_PATH)
     else:
         keys = process_map(DATA_PATH)
-    
+
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w") as fo:
         pprint.pprint(keys, fo)
@@ -79,5 +79,5 @@ if __name__ == "__main__":
     dataset = "full"
     if len(sys.argv) > 1:
         dataset = sys.argv[1]
-        
+
     test(dataset)

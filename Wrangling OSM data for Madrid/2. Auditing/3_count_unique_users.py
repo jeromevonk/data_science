@@ -3,7 +3,7 @@
 """
 Udacity Data Science For Business Nanodegree
 Part 1: Data wrangling
-Project: Wrange OpenStreetMap Data
+Project: Wrangle OpenStreetMap Data
 Student: Jerome Vergueiro Vonk
 
 Script: 3_count_unique_users.py
@@ -38,13 +38,13 @@ def test(dataset):
     """Perform the test on the selected dataset"""
     print("Running 3_count_unique_users.py")
     users = set()
-    
+
     # Run against the sample or the full data?
     if dataset == "sample":
         users = process_map(SAMPLE_PATH)
     else:
         users = process_map(DATA_PATH)
-    
+
     os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
     with open(OUTPUT_FILE, "w") as fo:
         pprint.pprint(users, fo)
@@ -54,5 +54,5 @@ if __name__ == "__main__":
     dataset = "full"
     if len(sys.argv) > 1:
         dataset = sys.argv[1]
-        
+
     test(dataset)
