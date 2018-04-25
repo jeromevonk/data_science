@@ -4,7 +4,7 @@
 """
 Udacity Data Science For Business Nanodegree
 Part 1: Data wrangling
-Project: Wrange OpenStreetMap Data
+Project: Wrangle OpenStreetMap Data
 Student: Jerome Vergueiro Vonk
 
 Script: create_database.py
@@ -33,10 +33,10 @@ def create_database():
 
     # Connect to database
     conn = sqlite3.connect("madrid.db")
-    
+
     # Create a cursor
     c = conn.cursor()
-    
+
     # --------------------------------------------------------
     # Create and populate the nodes table
     # --------------------------------------------------------
@@ -49,17 +49,17 @@ def create_database():
                 version INTEGER,
                 changeset INTEGER,
                 timestamp TEXT)''')
-             
-    
+
+
     # Populate with the csv file
     with open(NODES_PATH, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader (csv_file, delimiter=',')
         to_db = [(i['id'], i['lat'], i['lon'], i['user'], i['uid'], i['version'], i['changeset'], i['timestamp']) for i in reader]
-    
+
     # Insert the rows
     c.executemany("INSERT INTO nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?);", (to_db))
-    
-    
+
+
     # --------------------------------------------------------
     # Create and populate the node_tags table
     # --------------------------------------------------------
@@ -69,8 +69,8 @@ def create_database():
                 value TEXT,
                 type TEXT,
                 FOREIGN KEY (node_id) REFERENCES nodes(node_id))''')
-             
-    
+
+
     # Populate with the csv file
     with open(NODE_TAGS_PATH, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader (csv_file, delimiter=',')
@@ -78,7 +78,7 @@ def create_database():
 
     # Insert the rows
     c.executemany("INSERT INTO node_tags VALUES (?, ?, ?, ?);", (to_db))
-    
+
 
     # --------------------------------------------------------
     # Create and populate the ways table
@@ -90,8 +90,8 @@ def create_database():
                 version INTEGER,
                 changeset INTEGER,
                 timestamp TEXT)''')
-             
-    
+
+
     # Populate with the csv file
     with open(WAYS_PATH, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader (csv_file, delimiter=',')
@@ -99,7 +99,7 @@ def create_database():
 
     # Insert the rows
     c.executemany("INSERT INTO ways VALUES (?, ?, ?, ?, ?, ?);", (to_db))
-    
+
     # --------------------------------------------------------
     # Create and populate the way_nodes table
     # --------------------------------------------------------
@@ -109,8 +109,8 @@ def create_database():
                 position INTEGER,
                 FOREIGN KEY (way_id) REFERENCES ways(way_id),
                 FOREIGN KEY (node_id) REFERENCES nodes(node_id))''')
-             
-    
+
+
     # Populate with the csv file
     with open(WAY_NODES_PATH, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader (csv_file, delimiter=',')
@@ -118,7 +118,7 @@ def create_database():
 
     # Insert the rows
     c.executemany("INSERT INTO way_nodes VALUES (?, ?, ?);", (to_db))
-    
+
     # --------------------------------------------------------
     # Create and populate the way_tags table
     # --------------------------------------------------------
@@ -128,8 +128,8 @@ def create_database():
                 value TEXT,
                 type TEXT,
                 FOREIGN KEY (way_id) REFERENCES ways(way_id))''')
-             
-    
+
+
     # Populate with the csv file
     with open(WAY_TAGS_PATH, 'r', encoding="utf-8") as csv_file:
         reader = csv.DictReader (csv_file, delimiter=',')
