@@ -14,15 +14,12 @@ Reference: https://docs.python.org/2/library/sqlite3.html
 """
 
 import os
+import json
 
 def aggregate(collection, pipeline, file_path):
     """Perfom an aggregation  and save the output in a json file"""
     result =  [doc for doc in collection.aggregate(pipeline)]
 
-    import pprint
-    pprint.pprint(result)
-
-    import json
     with open(file_path, 'w') as outfile:
         json.dump(result, outfile)
 
@@ -56,7 +53,7 @@ def perform_queries():
                  { "$sort"   : { "count" : -1 } },
                  { "$limit"  : 10 } ]
 
-    #aggregate(collection, pipeline, "queries\\users.json")
+    aggregate(collection, pipeline, "queries\\users.json")
 
 
     # What type of cuisine appears the most
@@ -66,7 +63,7 @@ def perform_queries():
                  { "$sort"   : { "count" : -1 } },
                  { "$limit"  : 10 } ]
 
-    #aggregate(collection, pipeline, "queries\\cuisine.json")
+    aggregate(collection, pipeline, "queries\\cuisine.json")
 
     # What postcode appears the most
     pipeline = [ { "$match"  : { "type": {"$eq" : "way" } } },
