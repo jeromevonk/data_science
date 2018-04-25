@@ -4,7 +4,7 @@
 """
 Udacity Data Science For Business Nanodegree
 Part 1: Data wrangling
-Project: Wrange OpenStreetMap Data
+Project: Wrangle OpenStreetMap Data
 Student: Jerome Vergueiro Vonk
 
 Script: preparing_database.py
@@ -47,13 +47,13 @@ WAY_NODES_FIELDS = ['id', 'node_id', 'position']
 # This mapping/expected dictionaries and the regular expression come from script '4_improve_street_types.py'
 street_type_re = re.compile(r'^[^\s]+', re.IGNORECASE)
 mapping = { "CL": "Calle", "C/": "Calle", "calle": "Calle", "CALLE": "Calle",
-            "AUTOP.": "Autopista", "Avda.": "Avenida", "Via": "Vía",  "plaza": "Plaza", 
+            "AUTOP.": "Autopista", "Avda.": "Avenida", "Via": "Vía",  "plaza": "Plaza",
             "CR": "Carrera", "CTRA.": "Carretera", "Ctra": "Carretera", "Pasage":"Pasaje"
            }
-           
+
 expected = ["Calle", "Plaza", "Avenida", "Vía", "Alameda", "Camino", "Pasaje", "Paseo", "Rambla",
             "Travesía", "Carrera", "Carretera", "Ronda", "Cuesta", "Glorieta", "Costanilla",
-            "Callejón", "Bulevar", "Corredera", "Gran", "Acceso", "Autovía", "Puerta", "Urbanización"]           
+            "Callejón", "Bulevar", "Corredera", "Gran", "Acceso", "Autovía", "Puerta", "Urbanización"]
 
 # Count how many addresses we were able to fix the street type
 improved_address = 0
@@ -65,7 +65,7 @@ def is_street_name(elem):
 def is_postal_code(elem):
     """Returns true if the element attribute is a postal code"""
     return (elem.attrib['k'] == "addr:postcode")
-  
+
 
 def auditStreetType(secondary, secondary_dic):
     """Audit the street type, according to expected street types dictionary"""
@@ -83,13 +83,13 @@ def auditStreetType(secondary, secondary_dic):
                 secondary_dic['value'] = secondary.attrib['v'].replace(street_type, mapping[street_type])
                 improved_address += 1
                 #print("Corrected \'{}\' to \'{}\'".format(secondary.attrib['v'], secondary_dic['value']) )
-                
+
             except BaseException as e:
                 # We could't fix this by automation
                 secondary_dic['value'] = secondary.attrib['v']
                 #print("Do not know how to fix '{}\'".format(secondary.attrib['v']))
-                
-                    
+
+
 def auditPostalCode(secondary, secondary_dic):
     """Audit the postal code (for Madrid, must be between 28000 and 29000)"""
     global improved_address
@@ -117,43 +117,43 @@ def auditPostalCode(secondary, secondary_dic):
         else:
             #print("Postal is not a number: ", secondary.attrib['v'])
             return False
-  
+
 def create_tags_dictionary(element, secondary):
     """Create a dictionary for the secondary tag that the element has"""
     secondary_dic = {}
-    
+
     # If the tag "k" value contains problematic characters, the tag should be ignored
     m = PROBLEMCHARS.search(secondary.attrib['k'])
     if m:
         print("Found a problem with \'k\' value: ", secondary.attrib['k'])
         return None
-    
+
     # If the tag "k" value contains a ":" the characters before the ":" should be set as the tag type
-    # and characters after the ":" should be set as the tag key   
+    # and characters after the ":" should be set as the tag key
     m = LOWER_COLON.search(secondary.attrib['k'])
     if m:
         secondary_dic['type'], secondary_dic['key'] = secondary.attrib['k'].split(":", 1)
     else:
         secondary_dic['type'] = "regular"
         secondary_dic['key']  = secondary.attrib['k']
-    
+
     # Value: the tag "v" attribute value
     if not is_street_name(secondary):
-    
+
         if not is_postal_code(secondary):
             secondary_dic['value'] = secondary.attrib['v']
         else:
-            # If it is a postcode, let's check if the postcode looks legit (for Madrid, must have 5 numbers and start with 28)    
+            # If it is a postcode, let's check if the postcode looks legit (for Madrid, must have 5 numbers and start with 28)
             if False == auditPostalCode(secondary, secondary_dic):
                 # there's an invalid postal code, so let's ignore this tag
                 return None
     else:
         # If this is a street name, let's audit the street type
         auditStreetType(secondary, secondary_dic)
-    
+
     # The TOP LEVEL (so we use element, not secundary) node/way ID
-    secondary_dic['id'] = element.attrib['id'] 
-    
+    secondary_dic['id'] = element.attrib['id']
+
     return secondary_dic
 
 def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIELDS, problem_chars=PROBLEMCHARS, default_tag_type='regular'):
@@ -163,34 +163,34 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
     way_attribs = {}
     way_nodes = []
     tags = []  # Handle secondary tags the same way for both node and way elements
-     
-    
+
+
     if element.tag == 'node':
-        
+
         # Fill the node attributes
         for item in NODE_FIELDS:
             node_attribs[item] = element.attrib[item]
-    
+
         # Do we have secondary tags?
         for secondary in element:
 
             # Fill in the secondary tags
             if secondary.tag == "tag":
-            
+
                 # Create a dictionary for the secondary tag
                 secondary_dic = create_tags_dictionary(element, secondary)
-                
+
                 # Check if tag was valid
                 if secondary_dic ==  None:
                     continue
-                
+
                 # Add the secondary dictionary to the tags list
                 tags.append(secondary_dic)
-    
+
         return {'node': node_attribs, 'node_tags': tags}
-        
+
     elif element.tag == 'way':
-    
+
         # Fill the way fields
         for item in WAY_FIELDS:
             way_attribs[item] = element.attrib[item]
@@ -198,39 +198,39 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
         # Do we have secondary tags?
         position = 0
         for secondary in element:
-            
+
             # Fill in the secondary tags
             if secondary.tag == "tag":
-            
+
                 # Create a dictionary for the secondary tag
                 secondary_dic = create_tags_dictionary(element, secondary)
-                
+
                 # Check if tag was validated
                 if secondary_dic ==  None:
                     continue
-                
+
                 # Add the secondary dictionary to the tags list
                 tags.append(secondary_dic)
-        
+
             # This are the way nodes
             elif secondary.tag == "nd":
-            
+
                 # Create a dictionary for the child nodes
                 child_nodes = {}
-                
+
                 # The TOP LEVEL (so we use element, not secundary) node/way ID
                 child_nodes['id'] = element.attrib['id']
-                
+
                 # node_id: the ref attribute value of the nd tag
                 child_nodes['node_id'] = secondary.attrib['ref']
-                
+
                 # position: the index starting at 0 of the nd tag i.e. what order the nd tag appears within the way element
                 child_nodes['position'] = position
                 position += 1
-            
+
                 # Add the child_nodes dictionary to the tags list
                 way_nodes.append(child_nodes)
-    
+
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
 
 
@@ -253,18 +253,15 @@ def validate_element(element, validator, schema=SCHEMA):
         field, errors = next(validator.errors.items())
         message_string = "\nElement of type '{0}' has the following errors:\n{1}"
         error_string = pprint.pformat(errors)
-        
+
         raise Exception(message_string.format(field, error_string))
-        
-# ================================================== #
-#               Main Function                        #
-# ================================================== #
+
 def process_map(file_in, validate):
     """Iteratively process each XML element and write to csv(s)"""
-    
+
     # Make sure the output directory exists
     os.makedirs(os.path.dirname(NODES_PATH), exist_ok=True)
-    
+
     with open(NODES_PATH,     'w', encoding="utf-8", newline='') as nodes_file, \
          open(NODE_TAGS_PATH, 'w', encoding="utf-8", newline='') as nodes_tags_file, \
          open(WAYS_PATH,      'w', encoding="utf-8", newline='') as ways_file, \
@@ -312,11 +309,11 @@ def prepare_database(dataset, validate):
 if __name__ == '__main__':
     # Note: Validation is ~ 10X slower.
     print("Running preparing_database.py")
-    
+
     dataset = "full"
     if len(sys.argv) > 1:
-        dataset = sys.argv[1]     
-    
+        dataset = sys.argv[1]
+
     prepare_database(dataset, validate = False)
-    
+
     print("{} address(es) were improved".format(improved_address))
